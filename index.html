@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matrix Terminal</title>
+
+<style>
+body{
+    margin:0;
+    background:#000;
+    overflow:hidden;
+    font-family:Consolas, monospace;
+}
+
+canvas{
+    position:fixed;
+    top:0;
+    left:0;
+}
+
+/* التيرمنال */
+#terminal{
+    position:absolute;
+    top:10px;
+    left:10px;
+    width:95%;
+    height:95%;
+    overflow:hidden;
+    color:#00ff00;
+    font-size:14px;
+    white-space:pre-wrap;
+    text-shadow:0 0 5px #00ff00;
+    z-index:10;
+}
+
+/* 🔴 Alarm */
+#alarm{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    color:red;
+    font-size:40px;
+    text-align:center;
+    display:none;
+    text-shadow:0 0 15px red;
+    z-index:20;
+    animation:shake 0.2s infinite;
+    white-space:pre-wrap;
+}
+
+@keyframes shake{
+    0%{transform:translate(-50%,-50%) translate(2px,2px);}
+    50%{transform:translate(-50%,-50%) translate(-2px,-2px);}
+    100%{transform:translate(-50%,-50%) translate(2px,2px);}
+}
+
+/* 🔒 شاشة القفل */
+#lockscreen{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:black;
+    display:none;
+    justify-content:center;
+    align-items:center;
+    z-index:30;
+    animation:flash 0.2s infinite;
+}
+
+#shutdownText{
+    color:red;
+    font-size:60px;
+    text-shadow:0 0 20px red;
+}
+
+@keyframes flash{
+    0%{background:black;}
+    50%{background:red;}
+    100%{background:black;}
+}
+</style>
+</head>
+
+<body>
+
+<div id="terminal"></div>
+<div id="alarm"></div>
+
+<div id="lockscreen">
+    <div id="shutdownText">SYSTEM SHUTDOWN</div>
+</div>
+
+<canvas id="matrix"></canvas>
+
+<script>
+
+// ================= MATRIX EFFECT =================
+
+const canvas = document.getElementById("matrix");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+const chars =
+"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*(){}[]<>/\\|";
+
+const letters = chars.split("");
+
+const fontSize = 12;
+const columns = Math.floor(canvas.width / fontSize);
+
+const drops = [];
+
+for(let i=0;i<columns;i++){
+    drops[i]=1;
+}
+
+function draw(){
+
+    ctx.fillStyle="rgba(0,0,0,0.05)";
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+
+    ctx.fillStyle="#00ff00";
+    ctx.font=fontSize+"px monospace";
+
+    for(let i=0;i<drops.length;i++){
+
+        const char=
+        letters[Math.floor(Math.random()*letters.length)];
+
+        ctx.fillText(
+            char,
+            i*fontSize,
+            drops[i]*fontSize
+        );
+
+        if(
+            drops[i]*fontSize>canvas.height &&
+            Math.random()>0.975
+        ){
+            drops[i]=0;
+        }
+
+        drops[i]++;
+    }
+}
+
+setInterval(draw,20);
+
+
+// ================= TERMINAL =================
+
+const terminal =
+document.getElementById("terminal");
+
+const alarm =
+document.getElementById("alarm");
+
+const lockscreen =
+document.getElementById("lockscreen");
+
+let data = "";
+
+// 60 سطر وهمي
+for(let i = 1; i <= 60; i++){
+
+data +=
+"[INFO] ACCESSING SERVER #" + i + "\n" +
+"[OK] READING DATABASE...\n" +
+"[OK] SCANNING SYSTEM...\n\n";
+
+}
+
+data += `
+===================================
+
+USER Fady fares
+DEVICE Iphone 15 Pro max
+location Jeddah, Saudi Arabia al-safa
+
+ACCESS GRANTED
+
+MISSION COMPLETE تم التهكير بنجاح
+
+===================================
+`;
+
+const lines = data.split("\n");
+
+let currentLine = 0;
+
+
+// ================= SOUND =================
+
+function playAlarm(){
+
+try{
+    const ctxAudio =
+    new (window.AudioContext || window.webkitAudioContext)();
+
+    const osc = ctxAudio.createOscillator();
+    const gain = ctxAudio.createGain();
+
+    osc.type = "square";
+    osc.frequency.value = 800;
+
+    gain.gain.value = 0.2;
+
+    osc.connect(gain);
+    gain.connect(ctxAudio.destination);
+
+    osc.start();
+
+    setInterval(()=>{
+        osc.frequency.value = 600 + Math.random()*800;
+    },200);
+
+}catch(e){}
+}
+
+
+// ================= END EFFECT =================
+
+function endScene(){
+
+    alarm.style.display = "block";
+
+    let txt = "";
+
+    for(let i=0;i<30;i++){
+        txt += "⚠ تم التهكير ⚠ تم التهكير ⚠ تم التهكير\n";
+    }
+
+    alarm.innerText = txt;
+
+    setTimeout(()=>{
+
+        alarm.style.display = "none";
+        lockscreen.style.display = "flex";
+
+        playAlarm();
+
+    },2000);
+}
+
+
+// ================= TYPE EFFECT =================
+
+function typeLines(){
+
+    if(currentLine < lines.length){
+
+        terminal.innerHTML += lines[currentLine] + "\n";
+
+        terminal.scrollTop = terminal.scrollHeight;
+
+        currentLine++;
+
+        setTimeout(typeLines,41);
+
+    } else {
+        endScene();
+    }
+}
+
+setTimeout(typeLines,1000);
+
+</script>
+
+</body>
+</html>

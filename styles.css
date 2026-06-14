@@ -1,0 +1,35 @@
+/* ===== شاشة التهكير النهائية ===== */
+#finalScreen{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    color:red;
+    font-size:70px;
+    font-weight:bold;
+    text-shadow:0 0 25px red;
+    display:none;
+    z-index:100;
+    animation:shake 0.1s infinite;
+}
+
+/* اهتزاز كامل الشاشة */
+@keyframes shake{
+    0%{transform:translate(-50%,-50%) translate(5px,5px);}
+    25%{transform:translate(-50%,-50%) translate(-5px,5px);}
+    50%{transform:translate(-50%,-50%) translate(5px,-5px);}
+    75%{transform:translate(-50%,-50%) translate(-5px,-5px);}
+    100%{transform:translate(-50%,-50%) translate(5px,5px);}
+}
+
+/* ===== شاشة سوداء مفاجئة ===== */
+#blackout{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:black;
+    display:none;
+    z-index:20;
+}
